@@ -3,15 +3,28 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @OA\Schema(
+ *     schema="User",
+ *     title="User",
+ *     description="Модель пользователя",
+ *     @OA\Property(property="id", type="integer", description="ID  
+пользователя"),
+ *     @OA\Property(property="name", type="string", description="Имя пользователя"),
+ *     @OA\Property(property="email", type="string",  
+format="email", description="Email пользователя"),
+ *     @OA\Property(property="email_verified_at",  
+type="string", format="date-time", description="Дата и время подтверждения email"),
+ * )
+ */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.

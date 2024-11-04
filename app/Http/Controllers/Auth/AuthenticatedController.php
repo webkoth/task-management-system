@@ -11,7 +11,30 @@ use Illuminate\Http\Request;
 class AuthenticatedController extends Controller
 {
     /**
-     * Handle an incoming authentication request.
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Аутентификация пользователя",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Успешная аутентификация",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", description="Токен доступа"),
+     *             @OA\Property(property="user", type="object", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Ошибка валидации"
+     *     )
+     * )
      */
     public function store(LoginRequest $request): JsonResponse
     {
@@ -31,19 +54,31 @@ class AuthenticatedController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'email_verified_at' => $user->email_verified_at,
-            ]
+            ],
         ]);
     }
 
     /**
-     * Destroy an authenticated session.
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Выход пользователя",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Успешный выход",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Successfully logged out")
+     *         )
+     *     )
+     * )
      */
     public function destroy(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Successfully logged out'
+            'message' => 'Successfully logged out',
         ]);
     }
 }

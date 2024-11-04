@@ -1,66 +1,169 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Authentication API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Это RESTful API приложение на базе Laravel с реализацией токен-аутентификации через Laravel Sanctum. 
+## 🔧 Требования
 
-## About Laravel
+* PHP 8.1 или выше
+* Composer
+* MySQL 5.7 или выше
+* Laravel 10.x
+* Laravel Sanctum
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Установка
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/webkoth/task-management-system
+cd task-management-system
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Установите зависимости:
+```bash
+composer install
+```
 
-## Learning Laravel
+### 3. Создайте файл конфигурации:
+```bash
+cp .env.example .env
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 4. Настройте подключение к базе данных в `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 5. Сгенерируйте ключ приложения:
+```bash
+php artisan key:generate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 6. Выполните миграции:
+```bash
+php artisan migrate
+```
 
-## Laravel Sponsors
+### 7. Установите и опубликуйте конфигурацию Sanctum:
+```bash
+composer require laravel/sanctum
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+php artisan migrate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## ⚙️ Конфигурация Sanctum
 
-### Premium Partners
+Убедитесь, что в файле `app/Http/Kernel.php` добавлен middleware Sanctum:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```php
+'api' => [
+    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+    'throttle:api',
+    \Illuminate\Routing\Middleware\SubstituteBindings::class,
+],
+```
 
-## Contributing
+## 📡 API Endpoints
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Маршруты (не требуют аутентификации)
 
-## Code of Conduct
+| Метод | URL | Описание |
+|:------|:----|:---------|
+| POST | `/api/register` | Регистрация нового пользователя |
+| POST | `/api/login` | Аутентификация пользователя |
+| POST | `/api/forgot-password` | Запрос на сброс пароля |
+| POST | `/api/reset-password` | Сброс пароля |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Защищенные маршруты (требуют аутентификации)
 
-## Security Vulnerabilities
+| Метод | URL | Описание |
+|:------|:----|:---------|
+| POST | `/api/logout` | Выход из системы |
+| GET | `/api/verify-email/{id}/{hash}` | Подтверждение email |
+| POST | `/api/email/verification-notification` | Повторная отправка письма для верификации |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 📋 Использование API
 
-## License
+### Аутентификация
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+> API использует токены Bearer для аутентификации. После успешного входа или регистрации вы получите токен, который нужно включать в заголовок `Authorization` для всех защищенных запросов:
+
+```http
+Authorization: Bearer <your-token>
+```
+
+### Примеры запросов
+
+#### Регистрация
+
+```http
+POST /api/register
+Content-Type: application/json
+
+{
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+}
+```
+
+#### Вход
+
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "password123"
+}
+```
+
+#### Успешный ответ:
+```json
+{
+    "token": "1|laravel_sanctum_token...",
+    "user": {
+        "id": 1,
+        "name": "Test User",
+        "email": "test@example.com",
+        "email_verified_at": "2024-01-01T00:00:00.000000Z"
+    }
+}
+```
+
+## 🔌 Postman Collection
+
+### Импорт коллекции
+
+1. Откройте Postman
+2. Нажмите "Import"
+3. Выберите файл `Laravel_API.postman_collection.json`
+
+### Настройка окружения
+
+1. Создайте новое окружение в Postman
+2. Добавьте следующие переменные:
+    * `base_url`: URL вашего API (например, `http://localhost:8000/api`)
+    * `auth_token`: оставьте пустым (будет заполняться автоматически после входа)
+
+### Использование коллекции
+
+1. Сначала выполните запрос регистрации или входа
+2. Токен автоматически сохранится в переменную окружения
+3. Все последующие защищенные запросы будут автоматически использовать этот токен
+
+## 🔒 Безопасность
+
+* Реализована защита от брутфорс-атак через rate limiting
+* Все пароли хэшируются с использованием безопасных алгоритмов
+* Используется токен-аутентификация через Sanctum
+* Реализована верификация email
+
+## 🔌 Swagger
+
+[Документация API](http://localhost:8000/api/documentation)
