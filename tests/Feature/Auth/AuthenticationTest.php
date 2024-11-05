@@ -14,34 +14,61 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->post('/login', [
+        $response = $this->postJson('api/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertNoContent();
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                ],
+                'token'
+            ]);
+
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $user->id,
+        ]);
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
+        $response = $this->postJson('api/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
-        $this->assertGuest();
+        $response->assertStatus(401)
+            ->assertJson([
+                'errors' => ['Invalid credentials']
+            ]);
     }
 
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post('/logout');
+        $loginResponse = $this->postJson('api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
 
-        $this->assertGuest();
-        $response->assertNoContent();
+        $token = $loginResponse->json('token');
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('api/logout');
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $user->id,
+        ]);
     }
 }
